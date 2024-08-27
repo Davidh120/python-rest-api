@@ -18,7 +18,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t your-dockerhub-username/microservice:${{ github.sha }} .
+        docker build -t davidh120/python-rest-api:${{ github.sha }} .
         echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         docker push davidh120/python-rest-api:${{ github.sha }}
 
