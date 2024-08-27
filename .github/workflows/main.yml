@@ -20,7 +20,7 @@ jobs:
       run: |
         docker build -t your-dockerhub-username/microservice:${{ github.sha }} .
         echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-        docker push your-dockerhub-username/microservice:${{ github.sha }}
+        docker push davidh120/python-rest-api:${{ github.sha }}
 
     - name: Deploy to Kubernetes
       env:
