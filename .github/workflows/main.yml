@@ -19,7 +19,7 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t your-dockerhub-username/microservice:${{ github.sha }} .
-        echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+        echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         docker push your-dockerhub-username/microservice:${{ github.sha }}
 
     - name: Deploy to Kubernetes
