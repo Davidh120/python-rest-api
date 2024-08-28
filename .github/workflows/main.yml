@@ -1,29 +1,56 @@
 name: CI/CD Pipeline
-
+ 
 on:
   push:
     branches:
       - main
+ 
+permissions:
+  contents: read
       
 jobs:
   build:
     runs-on: ubuntu-latest
-
+ 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
+ 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-
+ 
     - name: Build Docker image
       run: |
         docker build -t davidh120/python-rest-api:${{ github.sha }} .
         echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         docker push davidh120/python-rest-api:${{ github.sha }}
-
-    - name: Deploy to Kubernetes
+ 
+    - name: Clone externa repository
       env:
-        KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        repository: 'https://github.com/Davidh120/python-rest-api-k8s.git'
+        branch: 'main'
       run: |
-        helm upgrade --install microservice ./helm-chart --set image.tag=${{ github.sha }}
+        git clone --single-branch --branch ${{ env.branch }} ${{ env.repository }} python-rest-api-k8s
+        cd python-rest-api-k8s
+ 
+    - name : Use YAML processor
+      uses: mikefarah/yq@v4.44.3
+ 
+    - name: Update values.yaml
+      env:
+        IMAGE_NAME: 'davidh120/python-rest-api'
+        TAG: ${{ github.sha }}
+      run: |
+        yq eval '.image.tag = "${{ env.TAG }}"' -i python-rest-api-k8s/values.yaml
+ 
+    - name: Update external repository
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN_REPOSITORY }}
+      run: |
+        cd python-rest-api-k8s
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Actualiza imagen a ${{ env.IMAGE_NAME }}:${{ env.TAG }}"
+        git remote set-url origin https://Davidh120:${{ env.GITHUB_TOKEN }}@github.com/Davidh120/python-rest-api-k8s.git
+        git push origin main
