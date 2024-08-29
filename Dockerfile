@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia el resto del código del proyecto
+# Copia el resto del código del proyecto :>
 COPY . /app/
 
 # Expone el puerto en el que Django estará corriendo
